@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ОФП — Точка Отрыва</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 12px;
+      padding-bottom: 80px;
+      color: #2d3748;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 16px;
+      padding: 10px;
+    }
+    .header h1 { font-size: 1.5em; margin-bottom: 2px; }
+    .header p { font-size: 0.85em; opacity: 0.9; }
+    
+    /* Кнопки */
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:active { transform: scale(0.95); }
+    .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    .btn-secondary { background: #e2e8f0; color: #4a5568; }
+    .btn-success { background: #48bb78; color: white; }
+    .btn-warning { background: #ed8936; color: white; }
+    .btn-icon {
+      width: 38px; height: 38px;
+      padding: 0; justify-content: center;
+      font-size: 1.1em;
+    }
+    .btn-big { padding: 14px 18px; font-size: 1em; }
+    
+    /* Карточки */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    /* Топ-навигация */
+    .top-nav {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 6px;
+    }
+    .nav-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: white;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background 0.15s;
+    }
+    .nav-btn.active { background: white; color: #667eea; }
+    
+    /* Список событий */
+    .event-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px;
+      background: white;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      border-left: 5px solid #cbd5e0;
+    }
+    .event-card:active { transform: scale(0.99); }
+    .event-card.status-active { border-left-color: #48bb78; }
+    .event-card.status-registration { border-left-color: #ed8936; }
+    .event-card.status-completed { border-left-color: #a0aec0; opacity: 0.85; }
+    
+    .event-info { flex: 1; min-width: 0; }
+    .event-name { font-weight: 700; font-size: 1.05em; color: #2d3748; }
+    .event-meta { font-size: 0.85em; color: #718096; margin-top: 3px; }
+    .event-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75em;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .badge-registration { background: #fef0c7; color: #92400e; }
+    .badge-active { background: #d1fae5; color: #065f46; }
+    .badge-completed { background: #e5e7eb; color: #374151; }
+    .badge-type { background: #ede9fe; color: #5b21b6; }
+    
+    .event-arrow { color: #cbd5e0; font-size: 1.4em; margin-left: 8px; }
+    
+    /* Группы и атлеты (детальный экран события) */
+    .group-card {
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      cursor: pointer;
+      user-select: none;
+    }
+    .group-header h2 { font-size: 1.05em; }
+    .group-count {
+      background: rgba(255,255,255,0.25);
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+    .group-body { padding: 8px; }
+    .group-body.collapsed { display: none; }
+    
+    .athlete-card {
+      background: #f7fafc;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      border-left: 4px solid #cbd5e0;
+    }
+    .athlete-card.has-medal-1 { border-left-color: #ffd700; }
+    .athlete-card.has-medal-2 { border-left-color: #c0c0c0; }
+    .athlete-card.has-medal-3 { border-left-color: #cd7f32; }
+    
+    .athlete-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .athlete-name { font-weight: 700; color: #2d3748; }
+    .athlete-meta { font-size: 0.82em; color: #718096; margin-top: 2px; }
+    .progress-dots { display: flex; gap: 3px; }
+    .progress-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #cbd5e0;
+    }
+    .progress-dot.draft { background: #f6ad55; }
+    .progress-dot.submitted { background: #48bb78; }
+    
+    .athlete-body { padding: 0 14px 12px; border-top: 1px solid #e2e8f0; }
+    .athlete-body.collapsed { display: none; }
+    
+    .discipline-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px dashed #e2e8f0;
+    }
+    .discipline-row:last-child { border-bottom: none; }
+    .discipline-info { min-width: 0; }
+    .discipline-name { font-weight: 600; font-size: 0.93em; color: #2d3748; }
+    .discipline-meta { font-size: 0.78em; color: #718096; margin-top: 1px; }
+    
+    .result-input {
+      width: 78px;
+      padding: 8px 6px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 0.95em;
+      font-weight: 600;
+    }
+    .result-input:focus { outline: none; border-color: #667eea; background: #ebf4ff; }
+    .result-input.draft { border-color: #f6ad55; background: #fffaf0; }
+    .result-input.submitted { border-color: #48bb78; background: #f0fff4; }
+    
+    .submit-btn {
+      width: 40px; height: 38px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1em;
+      transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .submit-btn.state-empty { background: #e2e8f0; color: #a0aec0; cursor: default; }
+    .submit-btn.state-draft {
+      background: #f6ad55; color: white;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    .submit-btn.state-submitted { background: #48bb78; color: white; }
+    
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(246, 173, 85, 0.6); }
+      50% { box-shadow: 0 0 0 8px rgba(246, 173, 85, 0); }
+    }
+    
+    .place-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 36px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.82em;
+      background: #edf2f7;
+      color: #718096;
+    }
+    .place-badge.p1 { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #744210; }
+    .place-badge.p2 { background: linear-gradient(135deg, #c0c0c0, #e8e8e8); color: #2d3748; }
+    .place-badge.p3 { background: linear-gradient(135deg, #cd7f32, #e9a96c); color: white; }
+    
+    /* Клубный рейтинг */
+    .rating-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88em;
+    }
+    .rating-table th, .rating-table td {
+      padding: 10px 6px;
+      text-align: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .rating-table th {
+      background: #f7fafc;
+      font-weight: 700;
+      color: #4a5568;
+      font-size: 0.78em;
+      position: sticky;
+      top: 0;
+    }
+    .rating-table td.fio { text-align: left; font-weight: 600; }
+    .rating-row-1 { background: #fff8e1; }
+    .rating-row-2 { background: #f1f5f9; }
+    .rating-row-3 { background: #fef3e7; }
+    
+    /* Форма создания */
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #4a5568; font-size: 0.9em; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 0.95em;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    /* Сервис */
+    .loader { text-align: center; padding: 40px; color: white; }
+    .spinner {
+      display: inline-block;
+      width: 28px; height: 28px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .empty { text-align: center; padding: 30px 16px; color: #a0aec0; font-style: italic; }
+    .empty-icon { font-size: 2.5em; margin-bottom: 8px; opacity: 0.5; }
+    
+    .toast {
+      position: fixed;
+      bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      background: #2d3748;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      font-weight: 500;
+      max-width: 90%;
+    }
+    .toast.show { opacity: 1; }
+    .toast.error { background: #c53030; }
+    .toast.success { background: #2f855a; }
+    
+    /* Модалка */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .modal-bg.open { display: flex; align-items: flex-start; justify-content: center; }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      margin: 20px 0;
+    }
+    .modal h3 { margin-bottom: 14px; color: #2d3748; }
+    
+    .legend {
+      font-size: 0.78em;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 10px;
+      color: #718096;
+    }
+    .legend-item { display: flex; align-items: center; gap: 4px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+    
+    .back-btn {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.85em;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+    
+    @media (max-width: 500px) {
+      .header h1 { font-size: 1.2em; }
+      .discipline-row {
+        grid-template-columns: 1fr auto auto;
+      }
+      .place-badge { grid-column: 1 / -1; justify-self: end; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏆 ОФП — Точка Отрыва</h1>
+      <p>Система соревнований клуба</p>
+    </div>
+
+    <div class="top-nav">
+      <button class="nav-btn active" id="nav-events" onclick="switchScreen('events')">📅 События</button>
+      <button class="nav-btn" id="nav-rating" onclick="switchScreen('rating')">🏆 Рейтинг</button>
+    </div>
+
+    <div id="content">
+      <div class="loader"><span class="spinner"></span><span style="color:white;">Загрузка...</span></div>
+    </div>
+  </div>
+
+  <!-- Модалка создания события -->
+  <div class="modal-bg" id="createEventModal">
+    <div class="modal">
+      <h3>📅 Новое событие</h3>
+      <div class="form-group">
+        <label>Название</label>
+        <input type="text" id="evName" placeholder="Отчётные соревнования">
+      </div>
+      <div class="form-group">
+        <label>Дата</label>
+        <input type="date" id="evDate">
+      </div>
+      <div class="form-group">
+        <label>Тип</label>
+        <select id="evType">
+          <option value="ОФП">ОФП</option>
+          <option value="Отчётные">Отчётные</option>
+          <option value="Соревнования">Соревнования</option>
+          <option value="Турнир">Турнир</option>
+          <option value="Другое">Другое</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Описание (необязательно)</label>
+        <textarea id="evDescription" rows="2"></textarea>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:16px;">
+        <button class="btn btn-secondary" onclick="closeCreateModal()">Отмена</button>
+        <button class="btn btn-primary" onclick="createEvent()" style="flex:1;">✨ Создать</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let appState = {
+      screen: 'events',  // events | event-detail | rating
+      events: [],
+      hubUrl: '',
+      currentEvent: null,
+      currentEventData: null,
+      inputState: {}
+    };
+    
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + type;
+      setTimeout(() => { t.className = 'toast ' + type; }, 2500);
+    }
+    
+    function switchScreen(screen) {
+      appState.screen = screen;
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      const navBtn = document.getElementById('nav-' + screen);
+      if (navBtn) navBtn.classList.add('active');
+      
+      if (screen === 'events') loadEvents();
+      else if (screen === 'rating') loadRating();
+    }
+    
+    // ============ ЭКРАН: СПИСОК СОБЫТИЙ ============
+    
+    function loadEvents() {
+      document.getElementById('content').innerHTML = '<div class="loader"><span class="spinner"></span><span style="color:white;">Загрузка...</span></div>';
+      
+      google.script.run
+        .withSuccessHandler(data => {
+          appState.events = data.events;
+          appState.hubUrl = data.hubUrl;
+          renderEvents();
+        })
+        .withFailureHandler(err => {
+          document.getElementById('content').innerHTML = 
+            '<div class="card"><div class="empty">❌ Ошибка: ' + err.message + '<br><br>Проверьте HUB_SPREADSHEET_ID в свойствах скрипта и запустите initializeHub()</div></div>';
+        })
+        .loadHubData();
+    }
+    
+    function renderEvents() {
+      const events = appState.events;
+      const content = document.getElementById('content');
+      
+      const sorted = [...events].sort((a, b) => {
+        const order = { 'Идёт': 0, 'Регистрация': 1, 'Завершено': 2, 'Отменено': 3 };
+        return (order[a.status] || 99) - (order[b.status] || 99);
+      });
+      
+      let html = `
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <button class="btn btn-primary btn-big" style="flex:1;" onclick="openCreateModal()">➕ Новое событие</button>
+          <button class="btn btn-secondary btn-icon" onclick="openHub()" title="Открыть таблицу">📊</button>
+        </div>
+      `;
+      
+      if (sorted.length === 0) {
+        html += `
+          <div class="card">
+            <div class="empty">
+              <div class="empty-icon">📅</div>
+              Событий пока нет. Создайте первое!
+            </div>
+          </div>`;
+      } else {
+        html += sorted.map(e => {
+          const statusClass = e.status === 'Идёт' ? 'status-active' :
+                              e.status === 'Регистрация' ? 'status-registration' :
+                              e.status === 'Завершено' ? 'status-completed' : '';
+          const badgeClass = e.status === 'Идёт' ? 'badge-active' :
+                             e.status === 'Регистрация' ? 'badge-registration' : 'badge-completed';
+          
+          return `
+            <div class="event-card ${statusClass}" onclick="openEvent('${e.id}')">
+              <div class="event-info">
+                <div class="event-name">${e.name}</div>
+                <div class="event-meta">
+                  <span class="event-badge badge-type">${e.type}</span>
+                  <span class="event-badge ${badgeClass}">${e.status}</span>
+                  📅 ${e.date}
+                </div>
+              </div>
+              <div class="event-arrow">›</div>
+            </div>`;
+        }).join('');
+      }
+      
+      content.innerHTML = html;
+    }
+    
+    function openCreateModal() {
+      document.getElementById('evName').value = '';
+      document.getElementById('evDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('evType').value = 'ОФП';
+      document.getElementById('evDescription').value = '';
+      document.getElementById('createEventModal').classList.add('open');
+    }
+    
+    function closeCreateModal() {
+      document.getElementById('createEventModal').classList.remove('open');
+    }
+    
+    function createEvent() {
+      const name = document.getElementById('evName').value.trim();
+      const date = document.getElementById('evDate').value;
+      const type = document.getElementById('evType').value;
+      const description = document.getElementById('evDescription').value.trim();
+      
+      if (!name || !date) {
+        showToast('Заполните название и дату', 'error');
+        return;
+      }
+      
+      showToast('Создаю событие...');
+      
+      google.script.run
+        .withSuccessHandler(res => {
+          showToast('✅ Событие создано', 'success');
+          closeCreateModal();
+          loadEvents();
+        })
+        .withFailureHandler(err => {
+          showToast('Ошибка: ' + err.message, 'error');
+        })
+        .createEvent(name, date, type, description);
+    }
+    
+    function openHub() {
+      if (appState.hubUrl) window.open(appState.hubUrl, '_blank');
+    }
+    
+    // ============ ЭКРАН: ДЕТАЛИ СОБЫТИЯ ============
+    
+    function openEvent(eventId) {
+      appState.screen = 'event-detail';
+      appState.currentEvent = eventId;
+      
+      document.getElementById('content').innerHTML = '<div class="loader"><span class="spinner"></span><span style="color:white;">Загрузка события...</span></div>';
+      
+      google.script.run
+        .withSuccessHandler(data => {
+          appState.currentEventData = data;
+          appState.inputState = {};
+          
+          data.groups.forEach(group => {
+            group.participants.forEach(p => {
+              Object.keys(p.results).forEach(discId => {
+                const r = p.results[discId];
+                const key = p.key + '||' + discId;
+                appState.inputState[key] = {
+                  value: r.submittedValue !== null && r.submittedValue !== '' ? r.submittedValue.toString() : '',
+                  submittedValue: r.submittedValue,
+                  status: (r.submittedValue !== null && r.submittedValue !== '') ? 'submitted' : 'empty',
+                  place: r.place,
+                  disciplineName: r.disciplineName
+                };
+              });
+            });
+          });
+          
+          renderEventDetail();
+        })
+        .withFailureHandler(err => {
+          showToast('Ошибка: ' + err.message, 'error');
+        })
+        .loadEventData(eventId);
+    }
+    
+    function renderEventDetail() {
+      const { event, groups, disciplines } = appState.currentEventData;
+      
+      let html = `
+        <button class="back-btn" onclick="switchScreen('events')">← К списку событий</button>
+        <div class="card">
+          <h2 style="margin-bottom:4px;">${event.name}</h2>
+          <div style="color:#718096; font-size:0.9em;">
+            <span class="event-badge badge-type">${event.type}</span>
+            📅 ${event.date}
+          </div>
+          ${event.description ? `<div style="margin-top:8px; color:#4a5568; font-size:0.9em;">${event.description}</div>` : ''}
+          <div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="window.open('${event.url}', '_blank')">📊 Открыть таблицу</button>
+            <button class="btn btn-secondary" onclick="openEvent('${event.id}')">🔄 Обновить</button>
+          </div>
+        </div>
+        
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#cbd5e0;"></div>Пусто</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f6ad55;"></div>Введено</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#48bb78;"></div>Сохранено</div>
+        </div>
+      `;
+      
+      if (!groups || groups.length === 0) {
+        html += `
+          <div class="card">
+            <div class="empty">
+              <div class="empty-icon">📋</div>
+              Участники не найдены.<br>
+              <small>Добавьте их в таблицу события (любой лист кроме служебных _).</small>
+            </div>
+          </div>`;
+      } else {
+        html += groups.map((group, gIdx) => {
+          const genderIcon = group.name.startsWith('М') ? '👦' : '👧';
+          const genderText = group.name.startsWith('М') ? 'Мальчики' : 'Девочки';
+          const ageRange = group.name.substring(2);
+          
+          return `
+            <div class="group-card">
+              <div class="group-header" onclick="toggleGroup(${gIdx})">
+                <h2>${genderIcon} ${genderText} ${ageRange}</h2>
+                <span class="group-count">${group.participants.length} чел.</span>
+              </div>
+              <div class="group-body" id="group-body-${gIdx}">
+                ${group.participants.length === 0 ?
+                  '<div class="empty">Нет участников</div>' :
+                  group.participants.map((p, pIdx) => renderAthlete(group, p, gIdx, pIdx)).join('')}
+              </div>
+            </div>`;
+        }).join('');
+      }
+      
+      document.getElementById('content').innerHTML = html;
+    }
+    
+    function renderAthlete(group, athlete, gIdx, pIdx) {
+      const discCount = Object.keys(athlete.results).length;
+      let submitted = 0, draft = 0;
+      let bestPlace = null;
+      
+      const dots = Object.keys(athlete.results).map(discId => {
+        const key = athlete.key + '||' + discId;
+        const state = appState.inputState[key];
+        if (!state) return '<div class="progress-dot"></div>';
+        if (state.status === 'submitted') {
+          submitted++;
+          if (state.place) {
+            const p = parseInt(state.place);
+            if (bestPlace === null || p < bestPlace) bestPlace = p;
+          }
+        }
+        if (state.status === 'draft') draft++;
+        return `<div class="progress-dot ${state.status}"></div>`;
+      }).join('');
+      
+      const medalClass = bestPlace === 1 ? 'has-medal-1' : bestPlace === 2 ? 'has-medal-2' : bestPlace === 3 ? 'has-medal-3' : '';
+      
+      return `
+        <div class="athlete-card ${medalClass}">
+          <div class="athlete-header" onclick="toggleAthlete(${gIdx}, ${pIdx})">
+            <div>
+              <div class="athlete-name">${athlete.fio}</div>
+              <div class="athlete-meta">${athlete.age} лет · ${submitted}/${discCount} дисциплин</div>
+            </div>
+            <div class="progress-dots">${dots}</div>
+          </div>
+          <div class="athlete-body collapsed" id="athlete-body-${gIdx}-${pIdx}">
+            ${Object.keys(athlete.results).map(discId => {
+              const r = athlete.results[discId];
+              const key = athlete.key + '||' + discId;
+              const state = appState.inputState[key] || { value: '', status: 'empty', place: null };
+              const disc = appState.currentEventData.disciplines.find(d => d.id === discId);
+              if (!disc) return '';
+              return renderDiscRow(disc, state, key);
+            }).join('')}
+          </div>
+        </div>`;
+    }
+    
+    function renderDiscRow(disc, state, key) {
+      const placeBadge = state.place ? renderPlace(state.place) : '<span class="place-badge">—</span>';
+      const submitBtn = renderSubmitBtn(state.status, key);
+      
+      return `
+        <div class="discipline-row">
+          <div class="discipline-info">
+            <div class="discipline-name">${disc.name}</div>
+            <div class="discipline-meta">${disc.unit} · ${disc.typeLabel}</div>
+          </div>
+          <input type="text" 
+            class="result-input ${state.status === 'submitted' ? 'submitted' : state.status === 'draft' ? 'draft' : ''}" 
+            value="${state.value || ''}"
+            placeholder="—"
+            data-key="${key}"
+            oninput="onInputChange(this)"
+            inputmode="decimal">
+          ${submitBtn}
+          ${placeBadge}
+        </div>`;
+    }
+    
+    function renderSubmitBtn(status, key) {
+      if (status === 'empty') return `<button class="submit-btn state-empty" disabled>⬜</button>`;
+      if (status === 'draft') return `<button class="submit-btn state-draft" onclick="submitResult('${key}')" title="Сохранить">📤</button>`;
+      return `<button class="submit-btn state-submitted" onclick="editSubmitted('${key}')" title="Изменить">✅</button>`;
+    }
+    
+    function renderPlace(place) {
+      const p = parseInt(place);
+      let cls = 'place-badge', icon = p;
+      if (p === 1) { cls += ' p1'; icon = '🥇 1'; }
+      else if (p === 2) { cls += ' p2'; icon = '🥈 2'; }
+      else if (p === 3) { cls += ' p3'; icon = '🥉 3'; }
+      return `<span class="${cls}">${icon}</span>`;
+    }
+    
+    function onInputChange(input) {
+      const key = input.dataset.key;
+      const value = input.value.trim();
+      const state = appState.inputState[key];
+      if (!state) return;
+      
+      state.value = value;
+      if (value === '') state.status = 'empty';
+      else if (state.submittedValue !== null && state.submittedValue !== '' &&
+               parseFloat(value.replace(',', '.')) === parseFloat(state.submittedValue)) state.status = 'submitted';
+      else state.status = 'draft';
+      
+      updateRow(key);
+    }
+    
+    function updateRow(key) {
+      const state = appState.inputState[key];
+      const input = document.querySelector(`input[data-key="${key}"]`);
+      if (!input) return;
+      
+      input.classList.remove('draft', 'submitted');
+      if (state.status === 'draft') input.classList.add('draft');
+      else if (state.status === 'submitted') input.classList.add('submitted');
+      
+      const btn = input.nextElementSibling;
+      if (btn && btn.classList.contains('submit-btn')) {
+        btn.outerHTML = renderSubmitBtn(state.status, key);
+      }
+    }
+    
+    function submitResult(key) {
+      const state = appState.inputState[key];
+      if (!state || state.status !== 'draft') return;
+      
+      const numVal = parseFloat(state.value.replace(',', '.'));
+      if (isNaN(numVal)) { showToast('Введите число', 'error'); return; }
+      
+      const participantKey = key.split('||')[0];
+      const input = document.querySelector(`input[data-key="${key}"]`);
+      if (input) input.disabled = true;
+      
+      google.script.run
+        .withSuccessHandler(res => {
+          state.submittedValue = numVal;
+          state.status = 'submitted';
+          if (input) input.disabled = false;
+          showToast('✅ Сохранено', 'success');
+          setTimeout(() => openEvent(appState.currentEvent), 400);
+        })
+        .withFailureHandler(err => {
+          if (input) input.disabled = false;
+          showToast('Ошибка: ' + err.message, 'error');
+        })
+        .submitEventResult(appState.currentEvent, participantKey, state.disciplineName, state.value);
+    }
+    
+    function editSubmitted(key) {
+      const state = appState.inputState[key];
+      if (!state) return;
+      state.status = 'draft';
+      updateRow(key);
+      showToast('Измените значение и нажмите 📤');
+    }
+    
+    function toggleGroup(idx) {
+      const body = document.getElementById(`group-body-${idx}`);
+      if (body) body.classList.toggle('collapsed');
+    }
+    
+    function toggleAthlete(gIdx, pIdx) {
+      const body = document.getElementById(`athlete-body-${gIdx}-${pIdx}`);
+      if (body) body.classList.toggle('collapsed');
+    }
+    
+    // ============ ЭКРАН: КЛУБНЫЙ РЕЙТИНГ ============
+    
+    function loadRating() {
+      document.getElementById('content').innerHTML = '<div class="loader"><span class="spinner"></span><span style="color:white;">Загрузка...</span></div>';
+      
+      google.script.run
+        .withSuccessHandler(rating => {
+          renderRating(rating);
+        })
+        .withFailureHandler(err => {
+          showToast('Ошибка: ' + err.message, 'error');
+        })
+        .getClubRating();
+    }
+    
+    function renderRating(rating) {
+      let html = `
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+          <button class="btn btn-primary" style="flex:1;" onclick="recalcRating()">🔄 Пересчитать рейтинг</button>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:10px;">🏆 Клубный рейтинг</h3>
+      `;
+      
+      if (!rating || rating.length === 0) {
+        html += `<div class="empty"><div class="empty-icon">📊</div>Рейтинг пуст. Проведите хотя бы одно соревнование!</div>`;
+      } else {
+        html += `
+          <div style="overflow-x:auto;">
+          <table class="rating-table">
+            <thead>
+              <tr>
+                <th>Место</th>
+                <th>ФИО</th>
+                <th>Возр</th>
+                <th>Гр</th>
+                <th>Сб</th>
+                <th>🥇</th>
+                <th>🥈</th>
+                <th>🥉</th>
+                <th>Баллы</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rating.map((r, idx) => {
+                const placeNum = parseInt(r.place.toString().replace(/\D/g, '')) || (idx + 1);
+                const rowCls = placeNum === 1 ? 'rating-row-1' : placeNum === 2 ? 'rating-row-2' : placeNum === 3 ? 'rating-row-3' : '';
+                return `
+                  <tr class="${rowCls}">
+                    <td><strong>${r.place}</strong></td>
+                    <td class="fio">${r.fio}</td>
+                    <td>${r.age}</td>
+                    <td>${r.group}</td>
+                    <td>${r.events}</td>
+                    <td>${r.gold || ''}</td>
+                    <td>${r.silver || ''}</td>
+                    <td>${r.bronze || ''}</td>
+                    <td><strong>${r.points}</strong></td>
+                  </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+          </div>`;
+      }
+      
+      html += '</div>';
+      document.getElementById('content').innerHTML = html;
+    }
+    
+    function recalcRating() {
+      showToast('Пересчитываю...');
+      google.script.run
+        .withSuccessHandler(res => {
+          showToast(`✅ Готово: ${res.count} учеников`, 'success');
+          loadRating();
+        })
+        .withFailureHandler(err => {
+          showToast('Ошибка: ' + err.message, 'error');
+        })
+        .rebuildClubRating();
+    }
+    
+    // Старт
+    loadEvents();
+  </script>
+</body>
+</html>
