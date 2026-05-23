@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   ============================================================
-  ТОЧКА ОТРЫВА — Результаты соревнований (офлайн PWA) v4
+  ТОЧКА ОТРЫВА — Результаты соревнований (офлайн PWA) v3
   Автор: Данильченко Юрий Леонидович
   Организация: Спортивно-цирковая студия «Точка Отрыва»
   Telegram: @iuriletics | Бот: @Tochka_Otriva_bot
@@ -290,6 +290,7 @@ function viewSetup(){
       ${setupRow('✏️','Переименовать / дата','','renameEvent')}
       ${setupRow(ev.status==='active'?'📦':'✅',ev.status==='active'?'В архив':'Вернуть в активные','','toggleArchive')}
       ${setupRow('🗑','Удалить мероприятие','без возможности отмены','deleteEvent')}
+      ${setupRow('⟳','Синхронизировать все данные с таблицей','спортсмены, мероприятия, итоги, результаты','syncNow')}
     </div>`;
   app.querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>window[el.dataset.act]());
   dock.innerHTML=`<button class="btn ghost" onclick="goBack('events')">Назад</button>
@@ -429,6 +430,7 @@ window.renameEvent=function(){const ev=curEvent();
     saveEvents();hideModal();viewSetup();toast('Сохранено');};};
 window.toggleArchive=function(){const ev=curEvent();ev.status=ev.status==='active'?'archive':'active';saveEvents();viewSetup();
   toast(ev.status==='active'?'В активных':'В архиве');};
+window.syncNow=function(){syncUp();};
 window.deleteEvent=function(){const ev=curEvent();
   sheet.innerHTML=`<h3>Удалить мероприятие?</h3>
     <div class="hint">«${ev.name}» и все его результаты будут удалены без возможности отмены.</div>
@@ -574,7 +576,7 @@ function goBack(v){if(v==='events'){S.ev=null;S.group=null;S.athlete=null;}
 window.goBack=goBack;
 
 /* ── Синхронизация ── */
-const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbw1UAZDyKKz7Gku8tiDQDIGKMCVc7UEzgux2IvELUp2P-EqJQoBhctiYQ6H4POcVvRvEg/exec'; // ← вставь сюда URL веб-приложения Apps Script
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbzlhoPCMaDtFqIF3FoEMw2Kp_eLC87O5P2vXcy8FS3ka52T7AZJCMvU8gFm-lQIvpON2A/exec'; // ← вставь сюда URL веб-приложения Apps Script
 async function syncUp(){
   if(!navigator.onLine){toast('Нет интернета — синхр. позже');return;}
   if(!APPS_SCRIPT_URL){toast('Не задан URL Apps Script (см. инструкцию)');return;}
@@ -586,7 +588,7 @@ async function syncUp(){
   // отправляем мероприятия (телефон — главный источник; таблица = зеркало)
   try{
     const evRows=EVENTS.map(e=>({
-      id:e.id, name:e.name, date:e.date||'', created:e.created||'', status:e.status,
+      id:e.id, name:e.name, date:e.date||'', status:e.status,
       groups:e.groups.map(groupLabel).join(', '),
       discs:e.discs.map(d=>d.name).join(', '),
       athletes:e.roster.length
@@ -610,7 +612,9 @@ async function syncUp(){
   }catch(e){toast('Итоги не ушли');return;}
   // отправляем накопленные результаты
   const pending=Object.keys(DIRTY);
-  if(pending.length){const rows=pending.map(k=>{const[ev,a,d]=k.split('|');return{ev,athlete:a,disc:d,value:RESULTS[k]};});
+  if(pending.length){const rows=pending.map(k=>{const[ev,a,d]=k.split('|');
+    const ath=ATHLETES.find(x=>x.id===a);
+    return{ev,athlete:a,fio:ath?ath.fio:'',disc:d,value:RESULTS[k]};});
     try{await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({action:'saveResults',rows})});DIRTY={};await saveResults();}
     catch(e){toast('Итоги ок, результаты не ушли');return;}}
