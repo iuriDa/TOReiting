@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   ============================================================
-  ТОЧКА ОТРЫВА — Результаты соревнований (офлайн PWA) v3
+  ТОЧКА ОТРЫВА — Результаты соревнований (офлайн PWA) v4
   Автор: Данильченко Юрий Леонидович
   Организация: Спортивно-цирковая студия «Точка Отрыва»
   Telegram: @iuriletics | Бот: @Tochka_Otriva_bot
@@ -268,7 +268,7 @@ function newEventDialog(){
   document.getElementById('m_ok').onclick=()=>{
     const name=document.getElementById('m_name').value.trim();
     if(!name){toast('Введи название');return;}
-    const ev={id:uid('ev'),name,date:document.getElementById('m_date').value,status:'active',groups:[],discs:[],roster:[]};
+    const ev={id:uid('ev'),name,date:document.getElementById('m_date').value,created:todayISO(),status:'active',groups:[],discs:[],roster:[]};
     EVENTS.unshift(ev);saveEvents();hideModal();S.ev=ev.id;S.view='setup';render();toast('Создано');
   };
 }
@@ -439,15 +439,29 @@ window.deleteEvent=function(){const ev=curEvent();
     EVENTS=EVENTS.filter(e=>e.id!==ev.id);saveEvents();saveResults();hideModal();S.ev=null;S.view='events';render();toast('Удалено');};};
 
 /* ════════════ Экран: группы (для судейства) ════════════ */
+let GROUP_SEX='all'; // all | м | ж — фильтр пола, переносится на список участников
 function viewGroups(){
   const ev=curEvent();const roster=rosterAthletes(ev);
+  const bySex=a=>GROUP_SEX==='all'||a.sex===GROUP_SEX;
   app.innerHTML=`<button class="back" onclick="goBack('events')">‹ Мероприятия</button>
+    <div class="seg" id="segSex">
+      <button data-s="all" class="${GROUP_SEX==='all'?'on':''}">Все</button>
+      <button data-s="м" class="${GROUP_SEX==='м'?'on':''}">👦 Мальчики</button>
+      <button data-s="ж" class="${GROUP_SEX==='ж'?'on':''}">👧 Девочки</button></div>
     <div class="sec-title">Возрастная группа</div>
-    <div class="grid2">${ev.groups.map(g=>{
-      const c=roster.filter(a=>{const gg=groupOfIn(ev,a.dob);return gg&&gg.id===g.id;}).length;
+    <div class="grid2" id="ggrid"></div>`;
+  const drawGrid=()=>{
+    document.getElementById('ggrid').innerHTML=ev.groups.map(g=>{
+      const c=roster.filter(a=>{const gg=groupOfIn(ev,a.dob);return gg&&gg.id===g.id&&bySex(a);}).length;
       return `<div class="agecard" data-g="${g.id}"><div class="n">${g.min}–${g.max}</div>
-        <div class="l">лет</div><div class="c">${c} участ.</div></div>`;}).join('')}</div>`;
-  app.querySelectorAll('[data-g]').forEach(el=>el.onclick=()=>{S.group=el.dataset.g;S.view='athletes';render();});
+        <div class="l">лет</div><div class="c">${c} участ.</div></div>`;}).join('')
+      ||`<div class="empty" style="grid-column:1/-1">Сначала добавь группы в настройках</div>`;
+    document.querySelectorAll('[data-g]').forEach(el=>el.onclick=()=>{S.group=el.dataset.g;S.view='athletes';render();});
+  };
+  document.getElementById('segSex').querySelectorAll('button').forEach(btn=>btn.onclick=()=>{
+    GROUP_SEX=btn.dataset.s;document.querySelectorAll('#segSex button').forEach(x=>x.classList.remove('on'));
+    btn.classList.add('on');drawGrid();});
+  drawGrid();
   dock.innerHTML=`<button class="btn ghost" id="edit">⚙ Настройки мероприятия</button>`;
   document.getElementById('edit').onclick=()=>{S.view='setup';render();};
 }
@@ -455,9 +469,11 @@ function viewGroups(){
 /* ════════════ Экран: участники группы ════════════ */
 function viewAthletes(){
   const ev=curEvent();const g=ev.groups.find(g=>g.id===S.group);
-  const aths=rosterAthletes(ev).filter(a=>{const gg=groupOfIn(ev,a.dob);return gg&&gg.id===S.group;});
+  const bySex=a=>GROUP_SEX==='all'||a.sex===GROUP_SEX;
+  const aths=rosterAthletes(ev).filter(a=>{const gg=groupOfIn(ev,a.dob);return gg&&gg.id===S.group&&bySex(a);});
+  const sexLabel=GROUP_SEX==='м'?' · 👦':GROUP_SEX==='ж'?' · 👧':'';
   let h=`<button class="back" onclick="goBack('groups')">‹ Группы</button>
-    <div class="sec-title">${groupLabel(g)} · нажми для ввода</div><div class="list">`;
+    <div class="sec-title">${groupLabel(g)}${sexLabel} · нажми для ввода</div><div class="list">`;
   h+=aths.map(a=>{
     const filled=ev.discs.filter(d=>RESULTS[rk(ev.id,a.id,d.id)]!=null).length;
     const done=filled>0?`<span class="pill done">${filled}/${ev.discs.length}</span>`:'';
@@ -488,8 +504,12 @@ function viewAthlete(){
     const key=rk(ev.id,a.id,inp.dataset.input);const raw=inp.value.trim();
     if(raw===''){delete RESULTS[key];delete DIRTY[key];}else{RESULTS[key]=parseFloat(raw.replace(',','.'));DIRTY[key]=1;}
     saveResults();inp.closest('.disc').classList.toggle('saved',raw!=='');toast('Сохранено');};});
-  dock.innerHTML=`<button class="btn ghost" onclick="goBack('athletes')">Готово</button>
+  dock.innerHTML=`<button class="btn ghost" id="done">Готово</button>
     <button class="btn" id="rk">🥇 Места</button>`;
+  document.getElementById('done').onclick=()=>{
+    goBack('athletes');
+    if(navigator.onLine&&APPS_SCRIPT_URL)syncUp(); // итоги уйдут в таблицу автоматически
+  };
   document.getElementById('rk').onclick=()=>{S.view='ranking';render();};
 }
 
@@ -504,6 +524,7 @@ function placesInDiscipline(aths,d,evId){
 let RANK_SEX='м';
 function viewRanking(){
   const ev=curEvent();
+  if(GROUP_SEX==='м'||GROUP_SEX==='ж')RANK_SEX=GROUP_SEX; // переносим выбор пола из групп
   const tabs=[...ev.discs.map(d=>({id:d.id,label:d.name.split(' ')[0]})),{id:'__total__',label:'Общий зачёт'}];
   let cur=tabs[0]?tabs[0].id:'__total__';
   const segSex=`<div class="seg" id="segSex" style="margin-bottom:14px;">
@@ -553,7 +574,7 @@ function goBack(v){if(v==='events'){S.ev=null;S.group=null;S.athlete=null;}
 window.goBack=goBack;
 
 /* ── Синхронизация ── */
-const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwTOsVLE6wj0teXdu46Tq9P3tjj0cdnQQtPS3JQFP7EQT1shiHSxpQpe4oOV-xqMbtERQ/exec'; // ← вставь сюда URL веб-приложения Apps Script
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbw1UAZDyKKz7Gku8tiDQDIGKMCVc7UEzgux2IvELUp2P-EqJQoBhctiYQ6H4POcVvRvEg/exec'; // ← вставь сюда URL веб-приложения Apps Script
 async function syncUp(){
   if(!navigator.onLine){toast('Нет интернета — синхр. позже');return;}
   if(!APPS_SCRIPT_URL){toast('Не задан URL Apps Script (см. инструкцию)');return;}
@@ -562,12 +583,65 @@ async function syncUp(){
     if(data.athletes){ATHLETES=data.athletes.map(a=>({id:String(a.ID),fio:a.ФИО,dob:toISO(a.ДатаРождения),
       sex:String(a.Пол||'').toLowerCase().startsWith('м')?'м':'ж'})).filter(a=>a.fio);await kvSet('athletes',ATHLETES);}
   }catch(e){toast('Не удалось скачать список');return;}
+  // отправляем мероприятия (телефон — главный источник; таблица = зеркало)
+  try{
+    const evRows=EVENTS.map(e=>({
+      id:e.id, name:e.name, date:e.date||'', created:e.created||'', status:e.status,
+      groups:e.groups.map(groupLabel).join(', '),
+      discs:e.discs.map(d=>d.name).join(', '),
+      athletes:e.roster.length
+    }));
+    await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'saveEvents',rows:evRows})});
+  }catch(e){toast('Спортсмены ок, мероприятия не ушли');return;}
+  // отправляем справочник дисциплин (чтобы в таблице были названия, а не ID)
+  try{
+    const discRows=[];
+    EVENTS.forEach(e=>e.discs.forEach(d=>discRows.push({
+      id:d.id, event:e.id, name:d.name, unit:d.unit, dir:d.dir==='max'?'больше лучше':'меньше лучше'})));
+    if(discRows.length) await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'saveDisciplines',rows:discRows})});
+  }catch(e){toast('Дисциплины не ушли');return;}
+  // считаем и отправляем ИТОГИ (общий зачёт): сумма мест + место, отдельно М и Д
+  try{
+    const totals=computeTotals();
+    if(totals.length) await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({action:'saveTotals',rows:totals})});
+  }catch(e){toast('Итоги не ушли');return;}
+  // отправляем накопленные результаты
   const pending=Object.keys(DIRTY);
   if(pending.length){const rows=pending.map(k=>{const[ev,a,d]=k.split('|');return{ev,athlete:a,disc:d,value:RESULTS[k]};});
     try{await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({action:'saveResults',rows})});DIRTY={};await saveResults();}
-    catch(e){toast('Список обновлён, результаты не ушли');return;}}
-  toast(`Готово ✓ Спортсменов: ${ATHLETES.length}`);render();
+    catch(e){toast('Итоги ок, результаты не ушли');return;}}
+  toast(`Готово ✓ Спортсменов: ${ATHLETES.length}, мероприятий: ${EVENTS.length}`);render();
+}
+
+/* Итоги (многоборье) по всем мероприятиям. Место — внутри (мероприятие × группа × пол). */
+function computeTotals(){
+  const out=[];
+  EVENTS.forEach(ev=>{
+    ev.groups.forEach(g=>{
+      ['м','ж'].forEach(sex=>{
+        const aths=rosterAthletes(ev).filter(a=>{const gg=groupOfIn(ev,a.dob);return gg&&gg.id===g.id&&a.sex===sex;});
+        if(!aths.length)return;
+        const placesByDisc=ev.discs.map(d=>placesInDiscipline(aths,d,ev.id));
+        const rows=aths.map(a=>{let sum=0,counted=0;placesByDisc.forEach(m=>{const r=m.get(a.id);if(r){sum+=r.place;counted++;}});
+          return {a,sum,counted};}).filter(r=>r.counted>0).sort((x,y)=>x.sum-y.sum||y.counted-x.counted);
+        let place=0,prev=null,prevC=null;
+        rows.forEach((r,i)=>{if(prev===null||r.sum!==prev||r.counted!==prevC){place=i+1;prev=r.sum;prevC=r.counted;}r.place=place;});
+        rows.forEach(r=>{
+          // сводка результатов по дисциплинам одной строкой: "Дисциплина: значение ед."
+          const details=ev.discs.map(d=>{const v=RESULTS[rk(ev.id,r.a.id,d.id)];
+            return v==null?null:`${d.name}: ${v}${d.unit?(' '+d.unit):''}`;}).filter(Boolean).join('; ');
+          out.push({
+            eventId:ev.id, eventName:ev.name, fio:r.a.fio, group:groupLabel(g),
+            sex:sex==='м'?'М':'Ж', total:r.sum, place:r.place, details});
+        });
+      });
+    });
+  });
+  return out;
 }
 
 /* ── Утилиты ── */
