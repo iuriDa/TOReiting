@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   ============================================================
-  ТОЧКА ОТРЫВА — Результаты соревнований (офлайн PWA)
+  ТОЧКА ОТРЫВА — Результаты соревнований (офлайн PWA) v3
   Автор: Данильченко Юрий Леонидович
   Организация: Спортивно-цирковая студия «Точка Отрыва»
   Telegram: @iuriletics | Бот: @Tochka_Otriva_bot
@@ -39,8 +39,10 @@
   .crumb{background:var(--panel2);border:1px solid var(--line);padding:4px 10px;border-radius:20px;color:var(--mut);}
   .crumb b{color:var(--ink);font-weight:600;}
   main{flex:1;padding:14px 14px calc(96px + var(--safe-b));}
-  .sec-title{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--mut);margin:18px 4px 8px;}
+  .sec-title{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--mut);margin:18px 4px 8px;
+    display:flex;align-items:center;justify-content:space-between;}
   .sec-title:first-child{margin-top:4px;}
+  .sec-title .add{color:var(--accent2);font-weight:700;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;}
   .list{display:flex;flex-direction:column;gap:8px;}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;
     display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .08s,border-color .15s;}
@@ -58,7 +60,7 @@
   .agecard{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 12px;
     text-align:center;cursor:pointer;transition:transform .08s,border-color .15s;}
   .agecard:active{transform:scale(.97);border-color:var(--accent);}
-  .agecard .n{font-size:22px;font-weight:800;}
+  .agecard .n{font-size:20px;font-weight:800;}
   .agecard .l{font-size:11px;color:var(--mut);margin-top:3px;}
   .agecard .c{font-size:11px;color:var(--accent2);margin-top:6px;}
   .athlete-head{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--line);
@@ -90,6 +92,7 @@
     color:#1a1206;background:linear-gradient(135deg,var(--accent),var(--accent2));transition:transform .08s;}
   .btn:active{transform:scale(.98);}
   .btn.ghost{background:var(--panel);color:var(--ink);border:1px solid var(--line);}
+  .btn.danger{background:var(--panel);color:var(--bad);border:1px solid rgba(248,81,73,.4);}
   .seg{display:flex;gap:6px;margin-bottom:12px;}
   .seg button{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--mut);padding:9px;border-radius:10px;
     font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;}
@@ -102,30 +105,34 @@
     padding:4px 0;display:flex;align-items:center;gap:5px;margin-bottom:6px;}
   .empty{text-align:center;color:var(--mut);padding:36px 20px;font-size:14px;line-height:1.6;}
   .toast{position:fixed;left:50%;bottom:calc(90px + var(--safe-b));transform:translateX(-50%);background:#000;color:#fff;
-    padding:10px 18px;border-radius:24px;font-size:13px;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;}
+    padding:10px 18px;border-radius:24px;font-size:13px;z-index:90;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;}
   .toast.show{opacity:.95;}
   .check{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);
-    border-radius:var(--r2);padding:13px 14px;margin-bottom:7px;cursor:pointer;transition:border-color .15s;}
+    border-radius:var(--r2);padding:13px 14px;margin-bottom:7px;transition:border-color .15s;}
   .check.on{border-color:var(--accent);background:var(--panel2);}
-  .check .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:15px;color:#1a1206;}
+  .check .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center;
+    font-size:15px;color:#1a1206;cursor:pointer;}
   .check.on .box{background:var(--accent);border-color:var(--accent);}
-  .check .body{flex:1;min-width:0;}
+  .check .body{flex:1;min-width:0;cursor:pointer;}
   .check .t{font-weight:600;font-size:14px;}
   .check .d{font-size:12px;color:var(--mut);margin-top:1px;}
-  /* модалка */
+  .check .del{color:var(--mut);font-size:18px;padding:4px 8px;cursor:pointer;}
   .modal{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.6);display:none;align-items:flex-end;}
   .modal.show{display:flex;}
   .sheet{background:var(--panel);width:100%;max-width:560px;margin:0 auto;border-radius:20px 20px 0 0;
-    padding:20px 18px calc(20px + var(--safe-b));border-top:1px solid var(--line);}
+    padding:20px 18px calc(20px + var(--safe-b));border-top:1px solid var(--line);max-height:90vh;overflow:auto;}
   .sheet h3{margin:0 0 14px;font-size:17px;}
   .field{margin-bottom:12px;}
   .field label{display:block;font-size:12px;color:var(--mut);margin-bottom:5px;}
-  .field input{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);font-size:15px;
+  .field input,.field select{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--ink);font-size:15px;
     padding:12px;border-radius:10px;}
-  .field input:focus{outline:none;border-color:var(--accent);}
-  .hidden{display:none !important;}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
+  .row2{display:flex;gap:8px;}
+  .row2 .field{flex:1;}
+  .seg.small button{padding:11px 8px;font-size:13px;}
   .hint{font-size:12px;color:var(--mut);background:var(--panel2);border:1px solid var(--line);
     border-radius:var(--r2);padding:11px 13px;line-height:1.5;margin-bottom:10px;}
+  .hidden{display:none !important;}
 </style>
 </head>
 <body>
@@ -142,64 +149,65 @@
 <main id="app"></main>
 <div class="dock" id="dock"></div>
 <div class="toast" id="toast"></div>
-
 <div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
 
 <script>
 /* ============================================================
-   СПРАВОЧНИКИ
-   Возрастные группы — фиксированный набор студии.
-   Дисциплины — общий каталог (можно дополнять). dir: max=больше лучше, min=меньше лучше.
-   В реальной работе эти два списка можно подтянуть из Google Sheets,
-   но они меняются редко, поэтому заданы здесь.
-   ============================================================ */
-const AGE_GROUPS=[
-  {key:'g34',min:3,max:4,label:'3–4 года'},
-  {key:'g56',min:5,max:6,label:'5–6 лет'},
-  {key:'g78',min:7,max:8,label:'7–8 лет'},
-  {key:'g910',min:9,max:10,label:'9–10 лет'},
-  {key:'g1112',min:11,max:12,label:'11–12 лет'},
-];
-const DISC_CATALOG=[
-  {id:'pullup',  name:'Подтягивания 30 сек', unit:'раз',     dir:'max'},
-  {id:'longjump',name:'Прыжок в длину',      unit:'см',      dir:'max'},
-  {id:'shuttle', name:'Челночный бег 3×10',  unit:'сек',     dir:'min'},
-  {id:'abs',     name:'Пресс 30 сек',        unit:'раз',     dir:'max'},
-  {id:'split',   name:'Шпагат (до пола)',    unit:'см',      dir:'min'},
-  {id:'speed30', name:'Speed 30 сек',        unit:'прыжки',  dir:'max'},
-];
+   МОДЕЛЬ ДАННЫХ (v3)
+   Каждое мероприятие хранит СВОИ группы и дисциплины (копии, не ссылки),
+   поэтому можно делать уникальные настройки под конкретный турнир.
 
-/* ============================================================
-   ОБЩИЙ СПИСОК СПОРТСМЕНОВ
-   Заполняется в Google-таблице (лист «Участники») и скачивается,
-   когда есть интернет. Пока пусто — добавишь в таблице.
-   Формат: {id, fio, dob:'ГГГГ-ММ-ДД', sex:'м'|'ж'}
-   ============================================================ */
-let ATHLETES=[]; // мастер-список (из Google Sheets)
+   event = {
+     id, name, date, status:'active'|'archive',
+     groups: [ {id, min, max, label} ... ],          // свои возрастные группы
+     discs:  [ {id, name, unit, dir:'max'|'min'} ],   // свои дисциплины
+     roster: [ athleteId ... ]                        // кто участвует (из общего списка)
+   }
 
-/* ============================================================
-   МОИ МЕРОПРИЯТИЯ (создаются в приложении, хранятся в телефоне)
-   event = {id, name, date, status, groups:[key...], discs:[id...], roster:[athleteId...]}
+   Шаблоны для переиспользования (чтобы не вводить каждый раз заново):
+     GROUP_TEMPLATES, DISC_TEMPLATES — пополняются, когда создаёшь новое.
    ============================================================ */
 let EVENTS=[];
-let RESULTS={};   // "ev|athleteId|discId" -> число
-let DIRTY={};     // что не синхронизировано
+let ATHLETES=[];          // общий список спортсменов (из Google Sheets)
+let RESULTS={};           // "ev|athleteId|discId" -> число
+let DIRTY={};
+let GROUP_TEMPLATES=[];   // [{min,max,label}] — недавно использованные группы
+let DISC_TEMPLATES=[];    // [{name,unit,dir}] — каталог дисциплин
+
+/* стартовые подсказки (можно удалить/изменить — они лишь шаблоны для быстрого выбора) */
+const DEFAULT_GROUPS=[{min:3,max:4},{min:5,max:6},{min:7,max:8},{min:9,max:10},{min:11,max:12}];
+const DEFAULT_DISCS=[
+  {name:'Подтягивания 30 сек',unit:'раз',dir:'max'},
+  {name:'Прыжок в длину',unit:'см',dir:'max'},
+  {name:'Челночный бег 3×10',unit:'сек',dir:'min'},
+  {name:'Пресс 30 сек',unit:'раз',dir:'max'},
+  {name:'Шпагат (до пола)',unit:'см',dir:'min'},
+  {name:'Speed 30 сек',unit:'прыжки',dir:'max'},
+];
 
 function ageOf(dob){const b=new Date(dob),n=new Date();let a=n.getFullYear()-b.getFullYear();
   const m=n.getMonth()-b.getMonth();if(m<0||(m===0&&n.getDate()<b.getDate()))a--;return a;}
-function groupOf(dob){const a=ageOf(dob);const g=AGE_GROUPS.find(g=>a>=g.min&&a<=g.max);return g?g:null;}
+/* группа спортсмена ВНУТРИ конкретного мероприятия (по его группам) */
+function groupOfIn(ev,dob){const a=ageOf(dob);return ev.groups.find(g=>a>=g.min&&a<=g.max)||null;}
 function rk(ev,a,d){return `${ev}|${a}|${d}`;}
 function uid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+function groupLabel(g){return g.label||(g.min===g.max?`${g.min} лет`:`${g.min}–${g.max} лет`);}
 
 /* ── Хранилище IndexedDB ── */
-const DB_NAME='tochka_results2',STORE='kv';let _db=null;
+const DB_NAME='tochka_results3',STORE='kv';let _db=null;
 function db(){return new Promise((res,rej)=>{if(_db)return res(_db);const r=indexedDB.open(DB_NAME,1);
   r.onupgradeneeded=()=>r.result.createObjectStore(STORE);r.onsuccess=()=>{_db=r.result;res(_db);};r.onerror=()=>rej(r.error);});}
 function kvGet(k){return db().then(d=>new Promise(r=>{const t=d.transaction(STORE).objectStore(STORE).get(k);t.onsuccess=()=>r(t.result);t.onerror=()=>r(undefined);}));}
 function kvSet(k,v){return db().then(d=>new Promise(r=>{const t=d.transaction(STORE,'readwrite').objectStore(STORE).put(v,k);t.onsuccess=()=>r(true);t.onerror=()=>r(false);}));}
-async function loadAll(){EVENTS=(await kvGet('events'))||[];RESULTS=(await kvGet('results'))||{};DIRTY=(await kvGet('dirty'))||{};ATHLETES=(await kvGet('athletes'))||[];}
+async function loadAll(){
+  EVENTS=(await kvGet('events'))||[];RESULTS=(await kvGet('results'))||{};DIRTY=(await kvGet('dirty'))||{};
+  ATHLETES=(await kvGet('athletes'))||[];
+  GROUP_TEMPLATES=(await kvGet('gtpl'))||DEFAULT_GROUPS.slice();
+  DISC_TEMPLATES=(await kvGet('dtpl'))||DEFAULT_DISCS.slice();
+}
 async function saveEvents(){await kvSet('events',EVENTS);}
 async function saveResults(){await kvSet('results',RESULTS);await kvSet('dirty',DIRTY);}
+async function saveTpl(){await kvSet('gtpl',GROUP_TEMPLATES);await kvSet('dtpl',DISC_TEMPLATES);}
 
 /* ── Навигация ── */
 const S={ev:null,group:null,athlete:null,view:'events'};
@@ -207,27 +215,25 @@ const app=document.getElementById('app'),dock=document.getElementById('dock'),cr
 const modal=document.getElementById('modal'),sheet=document.getElementById('sheet');
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1900);}
 function curEvent(){return EVENTS.find(e=>e.id===S.ev);}
-function eventGroups(ev){return AGE_GROUPS.filter(g=>ev.groups.includes(g.key));}
-function eventDiscs(ev){return DISC_CATALOG.filter(d=>ev.discs.includes(d.id));}
 function rosterAthletes(ev){return ATHLETES.filter(a=>ev.roster.includes(a.id));}
 
 function crumbs(){
   const p=[];const ev=curEvent();
   if(ev)p.push(`<span class="crumb">📋 <b>${ev.name}</b></span>`);
-  if(S.group){const g=AGE_GROUPS.find(g=>g.key===S.group);p.push(`<span class="crumb">👥 <b>${g.label}</b></span>`);}
+  if(S.group&&ev){const g=ev.groups.find(g=>g.id===S.group);if(g)p.push(`<span class="crumb">👥 <b>${groupLabel(g)}</b></span>`);}
   if(S.athlete){const a=ATHLETES.find(a=>a.id===S.athlete);if(a)p.push(`<span class="crumb">🏃 <b>${a.fio}</b></span>`);}
   crumbsEl.innerHTML=p.join('');
 }
 function render(){crumbs();dock.innerHTML='';
   ({events:viewEvents,setup:viewSetup,groups:viewGroups,athletes:viewAthletes,athlete:viewAthlete,ranking:viewRanking}[S.view]||viewEvents)();}
 
-/* ── Экран: список моих мероприятий ── */
+/* ════════════ Экран: список мероприятий ════════════ */
 function viewEvents(){
   const active=EVENTS.filter(e=>e.status==='active');
   const arch=EVENTS.filter(e=>e.status!=='active');
   let h='';
   if(!EVENTS.length){
-    h=`<div class="empty">У тебя пока нет мероприятий.<br>Нажми «+ Новое мероприятие», чтобы создать первое.</div>`;
+    h=`<div class="empty">У тебя пока нет мероприятий.<br>Нажми «+ Новое мероприятие», чтобы создать первое.<br><br>Участников можно добавить позже.</div>`;
   }else{
     h=`<div class="sec-title">Активные</div><div class="list">`;
     h+=active.map(eventCard).join('')||`<div class="empty">Нет активных</div>`;
@@ -242,173 +248,252 @@ function viewEvents(){
 }
 function eventCard(e){
   const pill=e.status==='active'?'<span class="pill act">активно</span>':'<span class="pill ina">архив</span>';
-  const cnt=`${e.roster.length} участ. · ${e.discs.length} дисц.`;
   return `<div class="card" data-ev="${e.id}"><div class="ic">🏆</div>
-    <div class="body"><div class="t">${e.name}</div><div class="d">${fmtDate(e.date)} · ${cnt}</div></div>
+    <div class="body"><div class="t">${e.name}</div>
+      <div class="d">${fmtDate(e.date)} · ${e.roster.length} участ. · ${e.discs.length} дисц.</div></div>
     ${pill}<span class="chev">›</span></div>`;
 }
-function openEvent(id){const e=EVENTS.find(x=>x.id===id);S.ev=id;
-  // если мероприятие ещё не настроено — ведём в настройку, иначе в группы
-  S.view=(e.groups.length&&e.discs.length&&e.roster.length)?'groups':'setup';render();}
+/* теперь всегда ведём в настройку — оттуда можно и судить, и редактировать */
+function openEvent(id){S.ev=id;S.group=null;S.athlete=null;S.view='setup';render();}
 
-/* ── Диалог создания мероприятия ── */
+/* создание мероприятия — БЕЗ обязательных участников */
 function newEventDialog(){
   sheet.innerHTML=`<h3>Новое мероприятие</h3>
     <div class="field"><label>Название</label><input id="m_name" placeholder="Например: Весенний кубок"></div>
     <div class="field"><label>Дата проведения</label><input id="m_date" type="date" value="${todayISO()}"></div>
-    <div style="display:flex;gap:8px;margin-top:6px;">
-      <button class="btn ghost" id="m_cancel">Отмена</button>
-      <button class="btn" id="m_ok">Создать</button></div>`;
+    <div class="hint">Группы, дисциплины и участников добавишь на следующем экране — в любом порядке и когда удобно.</div>
+    <div class="row2"><button class="btn ghost" id="m_cancel">Отмена</button><button class="btn" id="m_ok">Создать</button></div>`;
   showModal();
   document.getElementById('m_cancel').onclick=hideModal;
   document.getElementById('m_ok').onclick=()=>{
     const name=document.getElementById('m_name').value.trim();
-    const date=document.getElementById('m_date').value;
     if(!name){toast('Введи название');return;}
-    const ev={id:uid('ev'),name,date,status:'active',groups:[],discs:[],roster:[]};
-    EVENTS.unshift(ev);saveEvents();hideModal();S.ev=ev.id;S.view='setup';render();
-    toast('Мероприятие создано');
+    const ev={id:uid('ev'),name,date:document.getElementById('m_date').value,status:'active',groups:[],discs:[],roster:[]};
+    EVENTS.unshift(ev);saveEvents();hideModal();S.ev=ev.id;S.view='setup';render();toast('Создано');
   };
 }
 
-/* ── Экран: настройка мероприятия (группы, дисциплины, участники) ── */
+/* ════════════ Экран: настройка/редактирование мероприятия ════════════ */
 function viewSetup(){
   const ev=curEvent();
-  const gSel=ev.groups.length,dSel=ev.discs.length,rSel=ev.roster.length;
+  const ready=ev.groups.length&&ev.discs.length&&ev.roster.length;
   app.innerHTML=`<button class="back" onclick="goBack('events')">‹ Мероприятия</button>
-    <div class="athlete-head"><div class="nm">${ev.name}</div><div class="mt">${fmtDate(ev.date)}</div></div>
-    <div class="hint">Настрой мероприятие в 3 шага. Можно вернуться и изменить в любой момент.</div>
+    <div class="athlete-head"><div class="nm">${ev.name}</div><div class="mt">${fmtDate(ev.date)} · ${ev.status==='active'?'активно':'архив'}</div></div>
+    <div class="hint">Настраивай в любом порядке. Всё можно менять и после соревнования.</div>
     <div class="list">
-      ${setupRow('1','👥','Возрастные группы',gSel?`выбрано: ${gSel}`:'не выбрано','pickGroups')}
-      ${setupRow('2','🎯','Дисциплины',dSel?`выбрано: ${dSel}`:'не выбрано','pickDiscs')}
-      ${setupRow('3','🏃','Участники',rSel?`отмечено: ${rSel}`:'не выбрано','pickRoster')}
+      ${setupRow('👥','Возрастные группы',ev.groups.length?ev.groups.map(groupLabel).join(', '):'не заданы','editGroups')}
+      ${setupRow('🎯','Дисциплины',ev.discs.length?ev.discs.map(d=>d.name).join(', '):'не заданы','editDiscs')}
+      ${setupRow('🏃','Участники',ev.roster.length?`${ev.roster.length} спортсменов`:'не выбраны','editRoster')}
+    </div>
+    <div class="sec-title">Управление</div>
+    <div class="list">
+      ${setupRow('✏️','Переименовать / дата','','renameEvent')}
+      ${setupRow(ev.status==='active'?'📦':'✅',ev.status==='active'?'В архив':'Вернуть в активные','','toggleArchive')}
+      ${setupRow('🗑','Удалить мероприятие','без возможности отмены','deleteEvent')}
     </div>`;
   app.querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>window[el.dataset.act]());
-  const ready=gSel&&dSel&&rSel;
   dock.innerHTML=`<button class="btn ghost" onclick="goBack('events')">Назад</button>
-    <button class="btn" id="go" ${ready?'':'style="opacity:.5"'}>Начать судить →</button>`;
+    <button class="btn" id="go" ${ready?'':'style="opacity:.5"'}>Судить →</button>`;
   document.getElementById('go').onclick=()=>{
-    if(!ready){toast('Сначала пройди все 3 шага');return;}
+    if(!ev.groups.length){toast('Добавь хотя бы одну группу');return;}
+    if(!ev.discs.length){toast('Добавь хотя бы одну дисциплину');return;}
+    if(!ev.roster.length){toast('Отметь участников');return;}
     S.view='groups';render();
   };
 }
-function setupRow(n,ic,t,d,act){
+function setupRow(ic,t,d,act){
   return `<div class="card" data-act="${act}"><div class="ic">${ic}</div>
-    <div class="body"><div class="t">Шаг ${n}. ${t}</div><div class="d">${d}</div></div><span class="chev">›</span></div>`;
+    <div class="body"><div class="t">${t}</div>${d?`<div class="d">${d}</div>`:''}</div><span class="chev">›</span></div>`;
 }
 
-/* выбор возрастных групп — галочки */
-window.pickGroups=function(){
+/* ── Редактор возрастных групп мероприятия ── */
+window.editGroups=function(){
   const ev=curEvent();
-  sheet.innerHTML=`<h3>Возрастные группы</h3>
-    <div class="hint">Отметь группы, которые будут на этом мероприятии.</div>
-    <div id="gl">${AGE_GROUPS.map(g=>checkRow(g.key,g.label,'',ev.groups.includes(g.key))).join('')}</div>
-    <button class="btn" id="ok" style="margin-top:8px;">Готово</button>`;
-  showModal();bindChecks('gl');
-  document.getElementById('ok').onclick=()=>{ev.groups=collectChecks('gl');saveEvents();hideModal();render();};
+  const render=()=>{
+    const tplUnused=GROUP_TEMPLATES.filter(t=>!ev.groups.some(g=>g.min===t.min&&g.max===t.max));
+    sheet.innerHTML=`<h3>Возрастные группы</h3>
+      <div class="hint">Группы только этого мероприятия. Можно создать свои (например, 4–5 лет) или взять из недавних.</div>
+      <div class="sec-title">В мероприятии</div>
+      <div id="cur">${ev.groups.length?ev.groups.map(g=>
+        `<div class="check on"><div class="body"><div class="t">${groupLabel(g)}</div></div>
+          <div class="del" data-del="${g.id}">✕</div></div>`).join(''):'<div class="empty" style="padding:14px">Пока нет групп</div>'}</div>
+      <div class="row2" style="margin-top:6px;">
+        <div class="field"><label>От (лет)</label><input id="g_min" type="number" inputmode="numeric" placeholder="4"></div>
+        <div class="field"><label>До (лет)</label><input id="g_max" type="number" inputmode="numeric" placeholder="5"></div>
+      </div>
+      <button class="btn" id="g_add">+ Добавить группу</button>
+      ${tplUnused.length?`<div class="sec-title">Из недавних — нажми, чтобы добавить</div>
+        <div class="seg" style="flex-wrap:wrap;">${tplUnused.map((t,i)=>
+          `<button data-tpl="${i}" style="flex:none;">${t.min}–${t.max}</button>`).join('')}</div>`:''}
+      <button class="btn ghost" id="g_done" style="margin-top:10px;">Готово</button>`;
+    sheet.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{
+      ev.groups=ev.groups.filter(g=>g.id!==el.dataset.del);saveEvents();render();});
+    sheet.querySelectorAll('[data-tpl]').forEach(el=>el.onclick=()=>{
+      const t=tplUnused[+el.dataset.tpl];addGroup(t.min,t.max);});
+    document.getElementById('g_add').onclick=()=>{
+      const mn=parseInt(document.getElementById('g_min').value,10),mx=parseInt(document.getElementById('g_max').value,10);
+      if(isNaN(mn)||isNaN(mx)){toast('Введи возраст от и до');return;}
+      if(mn>mx){toast('«От» больше «До»');return;}addGroup(mn,mx);};
+    document.getElementById('g_done').onclick=()=>{hideModal();viewSetup();};
+  };
+  const addGroup=(mn,mx)=>{
+    if(ev.groups.some(g=>g.min===mn&&g.max===mx)){toast('Такая группа уже есть');return;}
+    ev.groups.push({id:uid('g'),min:mn,max:mx,label:`${mn}–${mx} лет`});
+    ev.groups.sort((a,b)=>a.min-b.min);
+    if(!GROUP_TEMPLATES.some(t=>t.min===mn&&t.max===mx)){GROUP_TEMPLATES.push({min:mn,max:mx});saveTpl();}
+    saveEvents();render();
+  };
+  showModal();render();
 };
-/* выбор дисциплин — галочки */
-window.pickDiscs=function(){
+
+/* ── Редактор дисциплин мероприятия ── */
+window.editDiscs=function(){
   const ev=curEvent();
-  sheet.innerHTML=`<h3>Дисциплины</h3>
-    <div class="hint">Отметь дисциплины этого мероприятия. Стрелка показывает, как считается лучший результат.</div>
-    <div id="dl">${DISC_CATALOG.map(d=>checkRow(d.id,d.name,
-       (d.dir==='max'?'↑ больше лучше':'↓ меньше лучше')+' · '+d.unit,ev.discs.includes(d.id))).join('')}</div>
-    <button class="btn" id="ok" style="margin-top:8px;">Готово</button>`;
-  showModal();bindChecks('dl');
-  document.getElementById('ok').onclick=()=>{ev.discs=collectChecks('dl');saveEvents();hideModal();render();};
+  const render=()=>{
+    const tplUnused=DISC_TEMPLATES.filter(t=>!ev.discs.some(d=>d.name===t.name));
+    sheet.innerHTML=`<h3>Дисциплины</h3>
+      <div class="hint">Дисциплины только этого мероприятия. Создай новую или возьми из каталога.</div>
+      <div class="sec-title">В мероприятии</div>
+      <div id="cur">${ev.discs.length?ev.discs.map(d=>
+        `<div class="check on"><div class="body"><div class="t">${d.name}</div>
+          <div class="d">${d.dir==='max'?'↑ больше лучше':'↓ меньше лучше'} · ${d.unit}</div></div>
+          <div class="del" data-del="${d.id}">✕</div></div>`).join(''):'<div class="empty" style="padding:14px">Пока нет дисциплин</div>'}</div>
+      <div class="field"><label>Название новой</label><input id="d_name" placeholder="Например: Отжимания 30 сек"></div>
+      <div class="row2">
+        <div class="field"><label>Единица</label><input id="d_unit" placeholder="раз / см / сек"></div>
+        <div class="field"><label>Лучший результат —</label>
+          <select id="d_dir"><option value="max">больше (↑)</option><option value="min">меньше (↓)</option></select></div>
+      </div>
+      <button class="btn" id="d_add">+ Добавить дисциплину</button>
+      ${tplUnused.length?`<div class="sec-title">Из каталога — нажми, чтобы добавить</div>
+        <div id="tpl" class="list">${tplUnused.map((t,i)=>
+          `<div class="check"><div class="box" data-tpl="${i}">+</div>
+            <div class="body" data-tpl="${i}"><div class="t">${t.name}</div>
+            <div class="d">${t.dir==='max'?'↑ больше':'↓ меньше'} · ${t.unit}</div></div></div>`).join('')}</div>`:''}
+      <button class="btn ghost" id="d_done" style="margin-top:10px;">Готово</button>`;
+    sheet.querySelectorAll('[data-del]').forEach(el=>el.onclick=()=>{
+      ev.discs=ev.discs.filter(d=>d.id!==el.dataset.del);saveEvents();render();});
+    sheet.querySelectorAll('[data-tpl]').forEach(el=>el.onclick=()=>{const t=tplUnused[+el.dataset.tpl];addDisc(t.name,t.unit,t.dir);});
+    document.getElementById('d_add').onclick=()=>{
+      const name=document.getElementById('d_name').value.trim();
+      const unit=document.getElementById('d_unit').value.trim()||'';
+      const dir=document.getElementById('d_dir').value;
+      if(!name){toast('Введи название');return;}addDisc(name,unit,dir);};
+    document.getElementById('d_done').onclick=()=>{hideModal();viewSetup();};
+  };
+  const addDisc=(name,unit,dir)=>{
+    if(ev.discs.some(d=>d.name===name)){toast('Такая дисциплина уже есть');return;}
+    ev.discs.push({id:uid('d'),name,unit,dir});
+    if(!DISC_TEMPLATES.some(t=>t.name===name)){DISC_TEMPLATES.push({name,unit,dir});saveTpl();}
+    saveEvents();render();
+  };
+  showModal();render();
 };
-/* выбор участников из общего списка — галочки */
-window.pickRoster=function(){
+
+/* ── Редактор участников (из общего списка) ── */
+window.editRoster=function(){
   const ev=curEvent();
   if(!ATHLETES.length){
     sheet.innerHTML=`<h3>Участники</h3>
-      <div class="hint">Общий список спортсменов пока пуст.<br><br>
-        Спортсмены заносятся в <b>Google-таблицу</b> (лист «Участники»): ФИО, дата рождения, пол.
-        Потом нажми «⟳ Синхр.» при интернете — они появятся здесь, и ты отметишь, кто участвует.</div>
+      <div class="hint">Общий список спортсменов пуст.<br><br>Занеси спортсменов в <b>Google-таблицу</b> (лист «Участники»): ФИО, дата рождения, пол. Потом нажми «⟳ Синхр.» при интернете — они появятся здесь.</div>
       <button class="btn" id="ok">Понятно</button>`;
-    showModal();document.getElementById('ok').onclick=hideModal;return;
+    showModal();document.getElementById('ok').onclick=()=>{hideModal();viewSetup();};return;
   }
   const sorted=[...ATHLETES].sort((a,b)=>a.fio.localeCompare(b.fio,'ru'));
   sheet.innerHTML=`<h3>Кто участвует</h3>
-    <div class="hint">Отметь спортсменов из общего списка, которые выступают на этом мероприятии.</div>
-    <div id="rl" style="max-height:50vh;overflow:auto;">${sorted.map(a=>checkRow(a.id,a.fio,
-       `${a.sex==='м'?'👦':'👧'} ${ageOf(a.dob)} лет`,ev.roster.includes(a.id))).join('')}</div>
+    <div class="hint">Отметь спортсменов из общего списка. Возрастная группа подберётся по группам этого мероприятия.</div>
+    <div id="rl" style="max-height:55vh;overflow:auto;">${sorted.map(a=>{
+      const g=groupOfIn(ev,a.dob);const on=ev.roster.includes(a.id);
+      return `<div class="check ${on?'on':''}" data-val="${a.id}">
+        <div class="box">${on?'✓':''}</div>
+        <div class="body"><div class="t">${a.fio}</div>
+          <div class="d">${a.sex==='м'?'👦':'👧'} ${ageOf(a.dob)} лет · ${g?groupLabel(g):'нет подходящей группы'}</div></div></div>`;}).join('')}</div>
     <button class="btn" id="ok" style="margin-top:8px;">Готово</button>`;
-  showModal();bindChecks('rl');
-  document.getElementById('ok').onclick=()=>{ev.roster=collectChecks('rl');saveEvents();hideModal();render();};
+  showModal();
+  document.getElementById('rl').querySelectorAll('.check').forEach(el=>{
+    el.onclick=()=>{const on=el.classList.toggle('on');el.querySelector('.box').textContent=on?'✓':'';};});
+  document.getElementById('ok').onclick=()=>{
+    ev.roster=[...document.getElementById('rl').querySelectorAll('.check.on')].map(el=>el.dataset.val);
+    saveEvents();hideModal();viewSetup();};
 };
 
-function checkRow(val,t,d,on){
-  return `<div class="check ${on?'on':''}" data-val="${val}">
-    <div class="box">${on?'✓':''}</div><div class="body"><div class="t">${t}</div>${d?`<div class="d">${d}</div>`:''}</div></div>`;
-}
-function bindChecks(id){document.getElementById(id).querySelectorAll('.check').forEach(el=>{
-  el.onclick=()=>{const on=el.classList.toggle('on');el.querySelector('.box').textContent=on?'✓':'';};});}
-function collectChecks(id){return [...document.getElementById(id).querySelectorAll('.check.on')].map(el=>el.dataset.val);}
+/* ── Управление мероприятием ── */
+window.renameEvent=function(){const ev=curEvent();
+  sheet.innerHTML=`<h3>Изменить мероприятие</h3>
+    <div class="field"><label>Название</label><input id="r_name" value="${ev.name.replace(/"/g,'&quot;')}"></div>
+    <div class="field"><label>Дата</label><input id="r_date" type="date" value="${ev.date||todayISO()}"></div>
+    <div class="row2"><button class="btn ghost" id="c">Отмена</button><button class="btn" id="ok">Сохранить</button></div>`;
+  showModal();document.getElementById('c').onclick=()=>{hideModal();viewSetup();};
+  document.getElementById('ok').onclick=()=>{const n=document.getElementById('r_name').value.trim();
+    if(!n){toast('Название пустое');return;}ev.name=n;ev.date=document.getElementById('r_date').value;
+    saveEvents();hideModal();viewSetup();toast('Сохранено');};};
+window.toggleArchive=function(){const ev=curEvent();ev.status=ev.status==='active'?'archive':'active';saveEvents();viewSetup();
+  toast(ev.status==='active'?'В активных':'В архиве');};
+window.deleteEvent=function(){const ev=curEvent();
+  sheet.innerHTML=`<h3>Удалить мероприятие?</h3>
+    <div class="hint">«${ev.name}» и все его результаты будут удалены без возможности отмены.</div>
+    <div class="row2"><button class="btn ghost" id="c">Отмена</button><button class="btn danger" id="ok">Удалить</button></div>`;
+  showModal();document.getElementById('c').onclick=()=>{hideModal();viewSetup();};
+  document.getElementById('ok').onclick=()=>{
+    Object.keys(RESULTS).forEach(k=>{if(k.startsWith(ev.id+'|')){delete RESULTS[k];delete DIRTY[k];}});
+    EVENTS=EVENTS.filter(e=>e.id!==ev.id);saveEvents();saveResults();hideModal();S.ev=null;S.view='events';render();toast('Удалено');};};
 
-/* ── Экран: возрастные группы (только выбранные для мероприятия) ── */
+/* ════════════ Экран: группы (для судейства) ════════════ */
 function viewGroups(){
-  const ev=curEvent();const groups=eventGroups(ev);const roster=rosterAthletes(ev);
+  const ev=curEvent();const roster=rosterAthletes(ev);
   app.innerHTML=`<button class="back" onclick="goBack('events')">‹ Мероприятия</button>
     <div class="sec-title">Возрастная группа</div>
-    <div class="grid2">${groups.map(g=>{
-      const c=roster.filter(a=>{const gg=groupOf(a.dob);return gg&&gg.key===g.key;}).length;
-      return `<div class="agecard" data-g="${g.key}"><div class="n">${g.label.split(' ')[0]}</div>
-        <div class="l">${g.label.replace(/^\S+\s/,'')}</div><div class="c">${c} участ.</div></div>`;
-    }).join('')}</div>`;
+    <div class="grid2">${ev.groups.map(g=>{
+      const c=roster.filter(a=>{const gg=groupOfIn(ev,a.dob);return gg&&gg.id===g.id;}).length;
+      return `<div class="agecard" data-g="${g.id}"><div class="n">${g.min}–${g.max}</div>
+        <div class="l">лет</div><div class="c">${c} участ.</div></div>`;}).join('')}</div>`;
   app.querySelectorAll('[data-g]').forEach(el=>el.onclick=()=>{S.group=el.dataset.g;S.view='athletes';render();});
   dock.innerHTML=`<button class="btn ghost" id="edit">⚙ Настройки мероприятия</button>`;
   document.getElementById('edit').onclick=()=>{S.view='setup';render();};
 }
 
-/* ── Экран: участники группы ── */
+/* ════════════ Экран: участники группы ════════════ */
 function viewAthletes(){
-  const ev=curEvent();const g=AGE_GROUPS.find(g=>g.key===S.group);
-  const aths=rosterAthletes(ev).filter(a=>{const gg=groupOf(a.dob);return gg&&gg.key===S.group;});
-  const discs=eventDiscs(ev);
+  const ev=curEvent();const g=ev.groups.find(g=>g.id===S.group);
+  const aths=rosterAthletes(ev).filter(a=>{const gg=groupOfIn(ev,a.dob);return gg&&gg.id===S.group;});
   let h=`<button class="back" onclick="goBack('groups')">‹ Группы</button>
-    <div class="sec-title">${g.label} · нажми для ввода</div><div class="list">`;
+    <div class="sec-title">${groupLabel(g)} · нажми для ввода</div><div class="list">`;
   h+=aths.map(a=>{
-    const filled=discs.filter(d=>RESULTS[rk(ev.id,a.id,d.id)]!=null).length;
-    const done=filled>0?`<span class="pill done">${filled}/${discs.length}</span>`:'';
+    const filled=ev.discs.filter(d=>RESULTS[rk(ev.id,a.id,d.id)]!=null).length;
+    const done=filled>0?`<span class="pill done">${filled}/${ev.discs.length}</span>`:'';
     return `<div class="card" data-a="${a.id}"><div class="ic">${a.sex==='м'?'👦':'👧'}</div>
       <div class="body"><div class="t">${a.fio}</div><div class="d">${fmtDate(a.dob)} · ${ageOf(a.dob)} лет</div></div>
       ${done}<span class="chev">›</span></div>`;
-  }).join('')||`<div class="empty">В этой группе нет отмеченных участников.<br>Проверь шаг «Участники» в настройках.</div>`;
+  }).join('')||`<div class="empty">В этой группе нет участников.<br>Проверь «Участники» в настройках, или возраст не попадает в ${groupLabel(g)}.</div>`;
   h+=`</div>`;app.innerHTML=h;
   app.querySelectorAll('[data-a]').forEach(el=>el.onclick=()=>{S.athlete=el.dataset.a;S.view='athlete';render();});
   dock.innerHTML=`<button class="btn" id="rk">🥇 Показать места</button>`;
   document.getElementById('rk').onclick=()=>{S.view='ranking';render();};
 }
 
-/* ── Экран: ввод результатов ── */
+/* ════════════ Экран: ввод результатов ════════════ */
 function viewAthlete(){
-  const ev=curEvent();const a=ATHLETES.find(x=>x.id===S.athlete);const discs=eventDiscs(ev);
-  const g=groupOf(a.dob);
+  const ev=curEvent();const a=ATHLETES.find(x=>x.id===S.athlete);const g=groupOfIn(ev,a.dob);
   let h=`<button class="back" onclick="goBack('athletes')">‹ Участники</button>
     <div class="athlete-head"><div class="nm">${a.fio}</div>
-      <div class="mt">${a.sex==='м'?'👦':'👧'} ${fmtDate(a.dob)} · ${ageOf(a.dob)} лет · ${g?g.label:'вне групп'}</div></div>`;
-  h+=discs.map(d=>{
-    const v=RESULTS[rk(ev.id,a.id,d.id)];
+      <div class="mt">${a.sex==='м'?'👦':'👧'} ${fmtDate(a.dob)} · ${ageOf(a.dob)} лет · ${g?groupLabel(g):'вне групп'}</div></div>`;
+  h+=ev.discs.map(d=>{const v=RESULTS[rk(ev.id,a.id,d.id)];
     return `<div class="disc ${v!=null?'saved':''}"><div class="top"><div class="nm">${d.name}</div>
       <div class="dir">${d.dir==='max'?'↑ больше лучше':'↓ меньше лучше'}</div></div>
       <div class="row"><input class="res" type="number" inputmode="decimal" step="any" placeholder="—"
-        value="${v!=null?v:''}" data-input="${d.id}"><span class="unit">${d.unit}</span></div></div>`;
-  }).join('');
+        value="${v!=null?v:''}" data-input="${d.id}"><span class="unit">${d.unit}</span></div></div>`;}).join('')
+    ||`<div class="empty">У мероприятия нет дисциплин.<br>Добавь их в настройках.</div>`;
   app.innerHTML=h;
   app.querySelectorAll('[data-input]').forEach(inp=>{inp.onchange=()=>{
     const key=rk(ev.id,a.id,inp.dataset.input);const raw=inp.value.trim();
-    if(raw===''){delete RESULTS[key];delete DIRTY[key];}
-    else{RESULTS[key]=parseFloat(raw.replace(',','.'));DIRTY[key]=1;}
-    saveResults();inp.closest('.disc').classList.toggle('saved',raw!=='');toast('Сохранено');
-  };});
+    if(raw===''){delete RESULTS[key];delete DIRTY[key];}else{RESULTS[key]=parseFloat(raw.replace(',','.'));DIRTY[key]=1;}
+    saveResults();inp.closest('.disc').classList.toggle('saved',raw!=='');toast('Сохранено');};});
   dock.innerHTML=`<button class="btn ghost" onclick="goBack('athletes')">Готово</button>
     <button class="btn" id="rk">🥇 Места</button>`;
   document.getElementById('rk').onclick=()=>{S.view='ranking';render();};
 }
 
-/* ── Подсчёт мест ── */
+/* ════════════ Подсчёт мест ════════════ */
 function placesInDiscipline(aths,d,evId){
   const scored=aths.map(a=>({a,v:RESULTS[rk(evId,a.id,d.id)]})).filter(x=>x.v!=null);
   scored.sort((x,y)=>d.dir==='max'?y.v-x.v:x.v-y.v);
@@ -418,9 +503,9 @@ function placesInDiscipline(aths,d,evId){
 }
 let RANK_SEX='м';
 function viewRanking(){
-  const ev=curEvent();const discs=eventDiscs(ev);
-  const tabs=[...discs.map(d=>({id:d.id,label:d.name.split(' ')[0]})),{id:'__total__',label:'Общий зачёт'}];
-  let cur=tabs[0].id;
+  const ev=curEvent();
+  const tabs=[...ev.discs.map(d=>({id:d.id,label:d.name.split(' ')[0]})),{id:'__total__',label:'Общий зачёт'}];
+  let cur=tabs[0]?tabs[0].id:'__total__';
   const segSex=`<div class="seg" id="segSex" style="margin-bottom:14px;">
     <button data-s="м" class="${RANK_SEX==='м'?'on':''}">👦 Мальчики</button>
     <button data-s="ж" class="${RANK_SEX==='ж'?'on':''}">👧 Девочки</button></div>`;
@@ -428,24 +513,21 @@ function viewRanking(){
     `<button data-d="${t.id}" class="${i===0?'on':''}">${t.label}</button>`).join('')}</div>`;
   app.innerHTML=`<button class="back" onclick="goBack('athletes')">‹ Участники</button>
     ${segSex}<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">${segDisc}</div><div id="rankBody"></div>`;
-
   const draw=()=>{
-    const aths=rosterAthletes(ev).filter(a=>{const g=groupOf(a.dob);return g&&g.key===S.group&&a.sex===RANK_SEX;});
+    const aths=rosterAthletes(ev).filter(a=>{const g=groupOfIn(ev,a.dob);return g&&g.id===S.group&&a.sex===RANK_SEX;});
     let b='';
-    if(cur==='__total__'){b=drawTotal(aths);}
-    else{
-      const d=discs.find(x=>x.id===cur);const pl=placesInDiscipline(aths,d,ev.id);
+    if(cur==='__total__')b=drawTotal(aths);
+    else{const d=ev.discs.find(x=>x.id===cur);const pl=placesInDiscipline(aths,d,ev.id);
       const ranked=[...pl.entries()].map(([id,o])=>({a:aths.find(x=>x.id===id),...o})).sort((x,y)=>x.place-y.place);
       const none=aths.filter(a=>!pl.has(a.id));
       b=`<div class="sec-title">${d.name} · ${d.dir==='max'?'больше лучше ↑':'меньше лучше ↓'}</div>`;
       if(!ranked.length)b+=`<div class="empty">Пока нет результатов</div>`;
       b+=ranked.map(x=>rankRow(x.place,x.a.fio,`${x.value} <span style="font-size:12px;color:var(--mut)">${d.unit}</span>`)).join('');
-      if(none.length)b+=`<div class="sec-title">Без результата</div>`+none.map(a=>`<div class="rank"><div class="pos">–</div><div class="nm none">${a.fio}</div></div>`).join('');
-    }
+      if(none.length)b+=`<div class="sec-title">Без результата</div>`+none.map(a=>`<div class="rank"><div class="pos">–</div><div class="nm none">${a.fio}</div></div>`).join('');}
     document.getElementById('rankBody').innerHTML=b;
   };
   function drawTotal(aths){
-    const placesByDisc=discs.map(d=>({d,map:placesInDiscipline(aths,d,ev.id)}));
+    const placesByDisc=ev.discs.map(d=>({d,map:placesInDiscipline(aths,d,ev.id)}));
     const rows=aths.map(a=>{let sum=0,counted=0;placesByDisc.forEach(({map})=>{const r=map.get(a.id);if(r){sum+=r.place;counted++;}});
       return {a,sum,counted};}).filter(r=>r.counted>0).sort((x,y)=>x.sum-y.sum||y.counted-x.counted);
     let place=0,prev=null,prevC=null;
@@ -453,8 +535,7 @@ function viewRanking(){
     const none=aths.filter(a=>!rows.find(r=>r.a.id===a.id));
     let b=`<div class="sec-title">Многоборье · сумма мест (меньше = лучше)</div>`;
     if(!rows.length)b+=`<div class="empty">Нет результатов</div>`;
-    b+=rows.map(r=>rankRow(r.place,r.a.fio,
-      `<span style="font-size:14px">∑ ${r.sum}</span> <span style="font-size:11px;color:var(--mut)">(${r.counted} дисц.)</span>`)).join('');
+    b+=rows.map(r=>rankRow(r.place,r.a.fio,`<span style="font-size:14px">∑ ${r.sum}</span> <span style="font-size:11px;color:var(--mut)">(${r.counted} дисц.)</span>`)).join('');
     if(none.length)b+=`<div class="sec-title">Без результатов</div>`+none.map(a=>`<div class="rank"><div class="pos">–</div><div class="nm none">${a.fio}</div></div>`).join('');
     return b;
   }
@@ -464,40 +545,33 @@ function viewRanking(){
     document.querySelectorAll('#seg button').forEach(x=>x.classList.remove('on'));btn.classList.add('on');draw();});
   document.getElementById('segSex').querySelectorAll('button').forEach(btn=>btn.onclick=()=>{RANK_SEX=btn.dataset.s;
     document.querySelectorAll('#segSex button').forEach(x=>x.classList.remove('on'));btn.classList.add('on');draw();});
-  draw();
-  dock.innerHTML=`<button class="btn ghost" onclick="goBack('athletes')">‹ К участникам</button>`;
+  draw();dock.innerHTML=`<button class="btn ghost" onclick="goBack('athletes')">‹ К участникам</button>`;
 }
 
 function goBack(v){if(v==='events'){S.ev=null;S.group=null;S.athlete=null;}
   if(v==='groups'){S.group=null;S.athlete=null;}if(v==='athletes'){S.athlete=null;}S.view=v;render();}
 window.goBack=goBack;
 
-/* ── Синхронизация с Apps Script ── */
-const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxXy8qq6eu4AqU0TErcHKhhJWZKMDV4NhsR_1GX9aFupZyPqIX_RQQfdDKceYpVGaSY/exec'; // ← вставь сюда URL веб-приложения Apps Script
+/* ── Синхронизация ── */
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbwTOsVLE6wj0teXdu46Tq9P3tjj0cdnQQtPS3JQFP7EQT1shiHSxpQpe4oOV-xqMbtERQ/exec'; // ← вставь сюда URL веб-приложения Apps Script
 async function syncUp(){
   if(!navigator.onLine){toast('Нет интернета — синхр. позже');return;}
   if(!APPS_SCRIPT_URL){toast('Не задан URL Apps Script (см. инструкцию)');return;}
   toast('Соединение…');
-  // 1) скачать общий список спортсменов
-  try{
-    const r=await fetch(APPS_SCRIPT_URL);const data=await r.json();
-    if(data.athletes){ATHLETES=data.athletes.map(a=>({id:String(a.ID),fio:a.ФИО,
-      dob:toISO(a.ДатаРождения),sex:String(a.Пол||'').toLowerCase().startsWith('м')?'м':'ж'}));
-      await kvSet('athletes',ATHLETES);}
+  try{const r=await fetch(APPS_SCRIPT_URL);const data=await r.json();
+    if(data.athletes){ATHLETES=data.athletes.map(a=>({id:String(a.ID),fio:a.ФИО,dob:toISO(a.ДатаРождения),
+      sex:String(a.Пол||'').toLowerCase().startsWith('м')?'м':'ж'})).filter(a=>a.fio);await kvSet('athletes',ATHLETES);}
   }catch(e){toast('Не удалось скачать список');return;}
-  // 2) отправить накопленные результаты
   const pending=Object.keys(DIRTY);
-  if(pending.length){
-    const rows=pending.map(k=>{const[ev,a,d]=k.split('|');return{ev,athlete:a,disc:d,value:RESULTS[k]};});
+  if(pending.length){const rows=pending.map(k=>{const[ev,a,d]=k.split('|');return{ev,athlete:a,disc:d,value:RESULTS[k]};});
     try{await fetch(APPS_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},
       body:JSON.stringify({action:'saveResults',rows})});DIRTY={};await saveResults();}
-    catch(e){toast('Список обновлён, но результаты не ушли');return;}
-  }
+    catch(e){toast('Список обновлён, результаты не ушли');return;}}
   toast(`Готово ✓ Спортсменов: ${ATHLETES.length}`);render();
 }
 
 /* ── Утилиты ── */
-function fmtDate(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'});}
+function fmtDate(s){if(!s)return'';const d=new Date(s);return isNaN(d)?'':d.toLocaleDateString('ru-RU',{day:'2-digit',month:'long',year:'numeric'});}
 function todayISO(){return new Date().toISOString().slice(0,10);}
 function toISO(v){if(!v)return'';if(typeof v==='string'&&/^\d{4}-\d{2}-\d{2}/.test(v))return v.slice(0,10);
   const d=new Date(v);return isNaN(d)?'':d.toISOString().slice(0,10);}
