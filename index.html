@@ -185,10 +185,18 @@ const DEFAULT_DISCS=[
   {name:'Speed 30 сек',unit:'прыжки',dir:'max'},
 ];
 
-function ageOf(dob){const b=new Date(dob),n=new Date();let a=n.getFullYear()-b.getFullYear();
-  const m=n.getMonth()-b.getMonth();if(m<0||(m===0&&n.getDate()<b.getDate()))a--;return a;}
+function yearFromDate(v){
+  if(!v)return new Date().getFullYear();
+  const m=String(v).match(/^(\d{4})/);
+  if(m)return parseInt(m[1],10);
+  const d=new Date(v);
+  return isNaN(d)?new Date().getFullYear():d.getFullYear();
+}
+/* Возраст для возрастной группы считается по году мероприятия:
+   если ребёнку исполнится N лет в год турнира, он уже выступает как N-летний. */
+function ageOf(dob,refDate){return yearFromDate(refDate)-yearFromDate(dob);}
 /* группа спортсмена ВНУТРИ конкретного мероприятия (по его группам) */
-function groupOfIn(ev,dob){const a=ageOf(dob);return ev.groups.find(g=>a>=g.min&&a<=g.max)||null;}
+function groupOfIn(ev,dob){const a=ageOf(dob,ev&&ev.date);return ev.groups.find(g=>a>=g.min&&a<=g.max)||null;}
 function rk(ev,a,d){return `${ev}|${a}|${d}`;}
 function uid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 function groupLabel(g){return g.label||(g.min===g.max?`${g.min} лет`:`${g.min}–${g.max} лет`);}
@@ -408,7 +416,7 @@ window.editRoster=function(){
       return `<div class="check ${on?'on':''}" data-val="${a.id}">
         <div class="box">${on?'✓':''}</div>
         <div class="body"><div class="t">${a.fio}</div>
-          <div class="d">${a.sex==='м'?'👦':'👧'} ${ageOf(a.dob)} лет · ${g?groupLabel(g):'нет подходящей группы'}</div></div></div>`;}).join('')}</div>
+          <div class="d">${a.sex==='м'?'👦':'👧'} ${ageOf(a.dob,ev.date)} лет · ${g?groupLabel(g):'нет подходящей группы'}</div></div></div>`;}).join('')}</div>
     <button class="btn" id="ok" style="margin-top:8px;">Готово</button>`;
   showModal();
   document.getElementById('rl').querySelectorAll('.check').forEach(el=>{
@@ -480,7 +488,7 @@ function viewAthletes(){
     const filled=ev.discs.filter(d=>RESULTS[rk(ev.id,a.id,d.id)]!=null).length;
     const done=filled>0?`<span class="pill done">${filled}/${ev.discs.length}</span>`:'';
     return `<div class="card" data-a="${a.id}"><div class="ic">${a.sex==='м'?'👦':'👧'}</div>
-      <div class="body"><div class="t">${a.fio}</div><div class="d">${fmtDate(a.dob)} · ${ageOf(a.dob)} лет</div></div>
+      <div class="body"><div class="t">${a.fio}</div><div class="d">${fmtDate(a.dob)} · ${ageOf(a.dob,ev.date)} лет</div></div>
       ${done}<span class="chev">›</span></div>`;
   }).join('')||`<div class="empty">В этой группе нет участников.<br>Проверь «Участники» в настройках, или возраст не попадает в ${groupLabel(g)}.</div>`;
   h+=`</div>`;app.innerHTML=h;
@@ -494,7 +502,7 @@ function viewAthlete(){
   const ev=curEvent();const a=ATHLETES.find(x=>x.id===S.athlete);const g=groupOfIn(ev,a.dob);
   let h=`<button class="back" onclick="goBack('athletes')">‹ Участники</button>
     <div class="athlete-head"><div class="nm">${a.fio}</div>
-      <div class="mt">${a.sex==='м'?'👦':'👧'} ${fmtDate(a.dob)} · ${ageOf(a.dob)} лет · ${g?groupLabel(g):'вне групп'}</div></div>`;
+      <div class="mt">${a.sex==='м'?'👦':'👧'} ${fmtDate(a.dob)} · ${ageOf(a.dob,ev.date)} лет · ${g?groupLabel(g):'вне групп'}</div></div>`;
   h+=ev.discs.map(d=>{const v=RESULTS[rk(ev.id,a.id,d.id)];
     return `<div class="disc ${v!=null?'saved':''}"><div class="top"><div class="nm">${d.name}</div>
       <div class="dir">${d.dir==='max'?'↑ больше лучше':'↓ меньше лучше'}</div></div>
