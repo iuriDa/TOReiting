@@ -576,7 +576,7 @@ function goBack(v){if(v==='events'){S.ev=null;S.group=null;S.athlete=null;}
 window.goBack=goBack;
 
 /* ── Синхронизация ── */
-const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbzlhoPCMaDtFqIF3FoEMw2Kp_eLC87O5P2vXcy8FS3ka52T7AZJCMvU8gFm-lQIvpON2A/exec'; // ← вставь сюда URL веб-приложения Apps Script
+const APPS_SCRIPT_URL='https://script.google.com/macros/s/AKfycbxzXwCSajkh9vdcGepAXgcEhyvUxITTkRjCFDRkYUy98ntnPJ1azFFK3BqqKw_z6V_nUA/exec'; // ← вставь сюда URL веб-приложения Apps Script
 async function syncUp(){
   if(!navigator.onLine){toast('Нет интернета — синхр. позже');return;}
   if(!APPS_SCRIPT_URL){toast('Не задан URL Apps Script (см. инструкцию)');return;}
